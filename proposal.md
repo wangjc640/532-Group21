@@ -10,4 +10,6 @@ Development aid agencies are varied in size, missions, expertise, and experience
 
 ## Description of the data
 
+We will be visualizing country data from the summarized Gapminder dataset which has 14 columns containing various demographic data for each country from the year 1800, although data from the earlier years is often missing. The majority of our dashboard will focus on  the more current data and thus much of the historical data will not be used. Each country has has an associated region and sub_region which will be used mostly as filters. The health related indicators such as life_expectancy and child_mortality (deaths of children under 5 per 1,00 live births) of countries will be showcased alongside the economic level (GDP per capita, inflation adjusted) of countries to see how these variables are associated with one another. Furthermore, we will use the education level of each country represented by years_in_school for men and women to see any significant differences as well as population density and carbon dioxide emissions in tonnes per capita.
+
 ## Research questions you are exploring
