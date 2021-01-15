@@ -4,12 +4,12 @@
 
 The team will work closely together towards a successful DSCI 522 course project. Members of the team and their Github.com names are shown below: 
 
-| Name                | Github.com name |
-|---------------------|-----------------|
-| Elanor Boyle Stanley |  ebs33      |
-| Syad Khan   | Syad Khan  |
-| Jiacheng Wang       | wangjc640       |
-| Chuang(Frank) Wang  |   |
+| Name                 | Github.com name |
+| -------------------- | --------------- |
+| Elanor Boyle Stanley | ebs33           |
+| Syad Khan            | Syad Khan       |
+| Jiacheng Wang        | wangjc640       |
+| Chuang(Frank) Wang   | chuangw46       |
 
 This document governs how team members will work together through friendly, close, and efficient communication. 
 
@@ -45,10 +45,10 @@ We believe that efficient meetings are the cornerstone of success at this course
  
 The team will meet through video conferencing twice every week. Below is the meeting schedule (Vancouver time): 
 
-| Day      | Time      | Leader1             | Leader 2           |
-|----------|-----------|---------------------|--------------------|
-| Tuesday  | 2 pm - 4 pm | Elanor Boyle Stanley | Jiacheng Wang   |
-| Friday | 9 pm - 12 pm |  Chuang(Frank) Wang    |  Syad Khan |
+| Day     | Time         | Leader1              | Leader 2      |
+| ------- | ------------ | -------------------- | ------------- |
+| Tuesday | 2 pm - 4 pm  | Elanor Boyle Stanley | Jiacheng Wang |
+| Friday  | 9 pm - 12 pm | Chuang(Frank) Wang   | Syad Khan     |
 
  - Content and format
  
@@ -91,11 +91,11 @@ Taking into account MDS's overall curricular design and purposes, the team will 
 Team-members should dedicate themselves in a healthy manner to the project, like to all other MDS commitments. 
 We maintain a full-time commitment to communication from team-members. Taking into account time zone differences, the following table will guide the temporal aspect of communication among the team (Vancouver time):
 
-| Team-member         | Time dedicated to the project | Time able to reply to messages and answer questions | Time unavailable |
-|---------------------|-------------------------------|--------------------------------------------------|------------------|
-| Elanor Boyle Stanley | 12 am - 3 pm                  | 9 am - 4 pm                                     | Evenings        |
-| Chuang(Frank) Wang     | 12 am - 3 pm                   | 10 am - 9 pm                                      |      Sundays          |
-| Syad Khan       | 12 am - 3 pm                   | 9 am - 6 pm                                      | Sundays          |
-| Jiacheng Wang   | 12 pm - 3 pm                  | 9 pm - 9 am                                     | Sundays     |
+| Team-member          | Time dedicated to the project | Time able to reply to messages and answer questions | Time unavailable |
+| -------------------- | ----------------------------- | --------------------------------------------------- | ---------------- |
+| Elanor Boyle Stanley | 12 am - 3 pm                  | 9 am - 4 pm                                         | Evenings         |
+| Chuang(Frank) Wang   | 12 am - 3 pm                  | 10 am - 9 pm                                        | Sundays          |
+| Syad Khan            | 12 am - 3 pm                  | 9 am - 6 pm                                         | Sundays          |
+| Jiacheng Wang        | 12 pm - 3 pm                  | 9 pm - 9 am                                         | Sundays          |
 
 When unforeseen circumstances arise, they should be made known to the whole team as soon as possible. 
