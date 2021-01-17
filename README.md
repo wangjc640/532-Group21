@@ -8,3 +8,7 @@ The app has a single main page with three visualizations that depend on the filt
 
 ## App sketch
 ![dashBoard](AppSketch.png "App Sketch")
+
+
+## **License**
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/UBC-MDS/532-Group21/blob/main/LICENSE)
