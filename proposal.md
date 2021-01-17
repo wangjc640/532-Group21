@@ -20,6 +20,6 @@ Alice then finds GapExpresser using which she could find the valuable insights f
 
 By exploring the data in hand and the relative information observed from academic journals or news, Alice may notice that the educational discrepancy between men and women experienced a great decline in countries that received funds from World Education Services. However, there are a number of countries that did receive the funds but didn’t have a significant improvement record in women education level. Therefore, to make the best decision, Alice decided, based on analysis using GapExpresser, to focus her research and funds on those relatively “fund-sensitive” countries. 
 
-### App sketch
+## App sketch
 
 ![](imgs/AppSketch.png)
