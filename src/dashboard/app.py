@@ -8,7 +8,7 @@ import pandas as pd
 import controls as ctrs
 
 # Read in global data
-gapminder = pd.read_csv("data/processed/world-data-gapminder_processed.csv")
+gapminder = pd.read_csv("data/processed/gapminder_processed.csv")
 
 # Setup app and layout/frontend
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -95,12 +95,10 @@ app.layout = dbc.Container(
                 dbc.Col(
                     [
                         dbc.Row(dbc.Col(dcc.Graph(id="cluster-graph2"))),
-                        dbc.Row(
-                            [
-                                dbc.Col([bar], md=6),
-                                dbc.Col([line], md=6),
-                            ]
+                        html.Small(
+                            "Note: empty plots mean that we don't have data based on your selection"
                         ),
+                        dbc.Row([dbc.Col([bar], md=6), dbc.Col([line], md=6)]),
                     ],
                     md=8,
                 ),
@@ -132,12 +130,16 @@ def get_subregion(region):
     Input("region", "value"),
     Input("sub_region", "value"),
     Input("income_grp", "value"),
-    Input("pop_size", "value"),
-    Input("year", "value"),
 )
-def plot_bar(stat, region, sub_region, income_grp, pop_size, year):
+def plot_bar(stat, region, sub_region, income_grp):
+    alt.data_transformers.disable_max_rows()
+    data = gapminder[
+        (gapminder["year"] == 2015)
+        & (gapminder["sub_region"] == sub_region)
+        & (gapminder["income_group"] == income_grp)
+    ]
     chart = (
-        alt.Chart(gapminder)
+        alt.Chart(data)
         .mark_bar()
         .encode(y=alt.Y("country", sort="-x"), x=stat, color="country")
         .transform_window(

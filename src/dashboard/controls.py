@@ -5,7 +5,7 @@ import pandas as pd
 
 
 # Read in global data
-gapminder = pd.read_csv("data/processed/world-data-gapminder_processed.csv")
+gapminder = pd.read_csv("data/processed/gapminder_processed.csv")
 
 txt_stl = {
     "width": "350px",
@@ -28,7 +28,7 @@ stat = dcc.RadioItems(
             "label": "Child Mortality",
             "value": "child_mortality",
         },
-        {"label": "CO2 Emission", "value": "co2_per_capita"},
+        {"label": "Children per Woman", "value": "children_per_woman"},
     ],
     value="education_ratio",
     labelStyle={"display": "block"},
@@ -38,13 +38,13 @@ stat = dcc.RadioItems(
 region = dcc.Dropdown(
     id="region",
     options=[{"label": reg, "value": reg} for reg in gapminder["region"].unique()],
-    value="Africa",
+    value="Asia",
     style=txt_stl,
 )
 
 sub_region = dcc.Dropdown(
     id="sub_region",
-    value="Northern Africa",
+    value="Southern Asia",
     style=txt_stl,
 )
 
