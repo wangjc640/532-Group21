@@ -38,13 +38,13 @@ stat = dcc.RadioItems(
 region = dcc.Dropdown(
     id="region",
     options=[{"label": reg, "value": reg} for reg in gapminder["region"].unique()],
-    value="Asia",
+    value=None,
     style=txt_stl,
 )
 
 sub_region = dcc.Dropdown(
     id="sub_region",
-    value="Southern Asia",
+    value=None,
     style=txt_stl,
 )
 
@@ -55,7 +55,7 @@ income_grp = dcc.Dropdown(
         {"label": reg, "value": reg}
         for reg in ["Low", "Lower middle", "Upper middle", "High"]
     ],
-    value="Low",
+    value=None,
     style=txt_stl,
 )
 
