@@ -14,6 +14,7 @@ gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
+
 controls = dbc.Card(
     [
         # control panel title
