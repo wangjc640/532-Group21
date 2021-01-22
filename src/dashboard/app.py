@@ -6,9 +6,9 @@ import altair as alt
 import dash_bootstrap_components as dbc
 import pandas as pd
 
-from src.dashboard import controls as ctrs
+# from src.dashboard import controls as ctrs
 
-# import controls as ctrs
+import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
@@ -197,7 +197,7 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
     chart = (
         alt.Chart(
             data,
-            title=f"{stat} of the {top_btm} 5 Countries in the most recent year you selected",
+            title=f"{stat} of the {top_btm} 5 Countries in {year[1]}",
         )
         .mark_bar()
         .encode(y=alt.Y("country", sort="-x", title="Country"), x=stat, color="country")
@@ -260,7 +260,10 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
     )
 
     line = (
-        alt.Chart(data, title=f"{stat} Trend - {top_btm} 5 Countries")
+        alt.Chart(
+            data,
+            title=f"{stat} trend of the {top_btm} 5 Countries ({year[0]} - {year[1]})",
+        )
         .mark_line()
         .encode(
             alt.X("year:T", title="Year"),
