@@ -5,6 +5,10 @@ from dash.dependencies import Input, Output
 import altair as alt
 import dash_bootstrap_components as dbc
 import pandas as pd
+
+import sys
+
+print("my_path", sys.path)
 import controls as ctrs
 
 # Read in global data
