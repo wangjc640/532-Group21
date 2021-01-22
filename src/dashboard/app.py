@@ -6,8 +6,9 @@ import altair as alt
 import dash_bootstrap_components as dbc
 import pandas as pd
 
-# from src.dashboard import controls as ctrs
-import controls as ctrs
+from src.dashboard import controls as ctrs
+
+# import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
@@ -243,6 +244,7 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
     else:
         data = gapminder
 
+    data = data[data["year"]]
     data = get_topbtm_data(data, stat, top_btm)
 
     zoom = alt.selection_interval(
