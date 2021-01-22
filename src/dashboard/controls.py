@@ -80,7 +80,7 @@ year = dcc.RangeSlider(
     id="year",
     min=1968,
     max=2015,
-    value=[1968, 2000],
+    value=[1968, 2015],
     step=1,
     marks={
         1968: {"label": "1968", "style": {"color": "white"}},
@@ -92,15 +92,15 @@ year = dcc.RangeSlider(
 )
 
 
-five_countries = dcc.RadioItems(
-    id="five_countries",
+top_btm = dcc.RadioItems(
+    id="top_btm",
     options=[
         {
-            "label": "Top 5 countries based on my selection",
+            "label": "Top 5 Countries",
             "value": "Top",
         },
         {
-            "label": "Bottom 5 countries based on my selection",
+            "label": "Bottom 5 Countries",
             "value": "Bottom",
         },
     ],
