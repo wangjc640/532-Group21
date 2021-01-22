@@ -8,11 +8,11 @@ import pandas as pd
 import controls as ctrs
 
 # Read in global data
-gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates = ['year'])
+gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
 
 # Setup app and layout/frontend
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+server = app.server
 
 controls = dbc.Card(
     [
@@ -120,10 +120,13 @@ def get_subregion(region):
         subs = gapminder[gapminder["region"] == region]["sub_region"].unique()
         opts = []
         for s in subs:
-            opts.append({"label": s, "value": s})    
-    else: 
-        opts=[{"label": sub_reg, "value": sub_reg} for sub_reg in gapminder["sub_region"].unique()]
-    return opts    
+            opts.append({"label": s, "value": s})
+    else:
+        opts = [
+            {"label": sub_reg, "value": sub_reg}
+            for sub_reg in gapminder["sub_region"].unique()
+        ]
+    return opts
 
 
 # Set up callbacks/backend
@@ -138,52 +141,47 @@ def plot_bar(stat, region, sub_region, income_grp):
     alt.data_transformers.disable_max_rows()
     if region is not None and sub_region is not None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
+            (gapminder["year"] == "2015")
             & (gapminder["region"] == region)
             & (gapminder["sub_region"] == sub_region)
             & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is None and income_grp is None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["region"] == region)
+            (gapminder["year"] == "2015") & (gapminder["region"] == region)
         ]
     elif region is None and sub_region is not None and income_grp is None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["sub_region"] == sub_region)
+            (gapminder["year"] == "2015") & (gapminder["sub_region"] == sub_region)
         ]
     elif region is None and sub_region is None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["income_group"] == income_grp)
+            (gapminder["year"] == "2015") & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is not None and income_grp is None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
+            (gapminder["year"] == "2015")
             & (gapminder["region"] == region)
             & (gapminder["sub_region"] == sub_region)
         ]
     elif region is None and sub_region is not None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
+            (gapminder["year"] == "2015")
             & (gapminder["sub_region"] == sub_region)
             & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015") 
+            (gapminder["year"] == "2015")
             & (gapminder["region"] == region)
             & (gapminder["income_group"] == income_grp)
         ]
     else:
-        data = gapminder[
-            (gapminder["year"] == "2015")
-        ]
+        data = gapminder[(gapminder["year"] == "2015")]
     chart = (
-        alt.Chart(data, title = f"{stat} - Top 5 Countries")
+        alt.Chart(data, title=f"{stat} - Top 5 Countries")
         .mark_bar()
-        .encode(y=alt.Y("country", sort="-x", title = "Country"), x=stat, color="country")
+        .encode(y=alt.Y("country", sort="-x", title="Country"), x=stat, color="country")
         .transform_window(
             rank="rank(stat)",
             sort=[alt.SortField(stat, order="descending")],
@@ -192,16 +190,17 @@ def plot_bar(stat, region, sub_region, income_grp):
     )
     return chart.to_html()
 
+
 @app.callback(
     Output("line", "srcDoc"),
     Input("stat", "value"),
     Input("region", "value"),
     Input("sub_region", "value"),
-    Input("income_grp", "value")
+    Input("income_grp", "value"),
 )
 def plot_line(stat, region, sub_region, income_grp):
-    alt.data_transformers.disable_max_rows()  
-    
+    alt.data_transformers.disable_max_rows()
+
     if region is not None and sub_region is not None and income_grp is not None:
         data = gapminder[
             (gapminder["region"] == region)
@@ -209,21 +208,14 @@ def plot_line(stat, region, sub_region, income_grp):
             & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is None and income_grp is None:
-        data = gapminder[
-            (gapminder["region"] == region)
-        ]
+        data = gapminder[(gapminder["region"] == region)]
     elif region is None and sub_region is not None and income_grp is None:
-        data = gapminder[
-            (gapminder["sub_region"] == sub_region)
-        ]
+        data = gapminder[(gapminder["sub_region"] == sub_region)]
     elif region is None and sub_region is None and income_grp is not None:
-        data = gapminder[
-            (gapminder["income_group"] == income_grp)
-        ]
+        data = gapminder[(gapminder["income_group"] == income_grp)]
     elif region is not None and sub_region is not None and income_grp is None:
         data = gapminder[
-            (gapminder["region"] == region)
-            & (gapminder["sub_region"] == sub_region)
+            (gapminder["region"] == region) & (gapminder["sub_region"] == sub_region)
         ]
     elif region is None and sub_region is not None and income_grp is not None:
         data = gapminder[
@@ -232,22 +224,30 @@ def plot_line(stat, region, sub_region, income_grp):
         ]
     elif region is not None and sub_region is None and income_grp is not None:
         data = gapminder[
-            (gapminder["region"] == region)
-            & (gapminder["income_group"] == income_grp)
+            (gapminder["region"] == region) & (gapminder["income_group"] == income_grp)
         ]
     else:
         data = gapminder
-    
-    top_countries = list(data.query("year == 2015").sort_values(by = stat,  ascending=False)["country"].head())
+
+    top_countries = list(
+        data.query("year == 2015")
+        .sort_values(by=stat, ascending=False)["country"]
+        .head()
+    )
 
     data = data.query("country == @top_countries")
 
     chart = (
-        alt.Chart(data, title = f"{stat} Trend - Top 5 Countries")
+        alt.Chart(data, title=f"{stat} Trend - Top 5 Countries")
         .mark_line()
-        .encode(alt.X("year:T", title = "Year"), y=stat, color = alt.Color("country", sort="-y", title = "Country"))
+        .encode(
+            alt.X("year:T", title="Year"),
+            y=stat,
+            color=alt.Color("country", sort="-y", title="Country"),
+        )
     )
     return chart.to_html()
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
