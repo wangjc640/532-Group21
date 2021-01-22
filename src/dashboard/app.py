@@ -146,53 +146,59 @@ def get_subregion(region):
     Input("sub_region", "value"),
     Input("income_grp", "value"),
     Input("five_countries", "value"),
+    Input("year", "value"),
 )
-def plot_bar(stat, region, sub_region, income_grp, top_btm):
+def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
     alt.data_transformers.disable_max_rows()
     if region is not None and sub_region is not None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015")
+            (gapminder["year"] == f"{year[1]}")
             & (gapminder["region"] == region)
             & (gapminder["sub_region"] == sub_region)
             & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is None and income_grp is None:
         data = gapminder[
-            (gapminder["year"] == "2015") & (gapminder["region"] == region)
+            (gapminder["year"] == f"{year[1]}") & (gapminder["region"] == region)
         ]
     elif region is None and sub_region is not None and income_grp is None:
         data = gapminder[
-            (gapminder["year"] == "2015") & (gapminder["sub_region"] == sub_region)
+            (gapminder["year"] == f"{year[1]}")
+            & (gapminder["sub_region"] == sub_region)
         ]
     elif region is None and sub_region is None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015") & (gapminder["income_group"] == income_grp)
+            (gapminder["year"] == f"{year[1]}")
+            & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is not None and income_grp is None:
         data = gapminder[
-            (gapminder["year"] == "2015")
+            (gapminder["year"] == f"{year[1]}")
             & (gapminder["region"] == region)
             & (gapminder["sub_region"] == sub_region)
         ]
     elif region is None and sub_region is not None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015")
+            (gapminder["year"] == f"{year[1]}")
             & (gapminder["sub_region"] == sub_region)
             & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is None and income_grp is not None:
         data = gapminder[
-            (gapminder["year"] == "2015")
+            (gapminder["year"] == f"{year[1]}")
             & (gapminder["region"] == region)
             & (gapminder["income_group"] == income_grp)
         ]
     else:
-        data = gapminder[(gapminder["year"] == "2015")]
+        data = gapminder[(gapminder["year"] == f"{year[1]}")]
 
-    data = get_topbtm_data(data, stat, top_btm)
+    data = get_topbtm_data(data, stat, top_btm, year)
 
     chart = (
-        alt.Chart(data, title=f"{stat} - {top_btm} 5 Countries")
+        alt.Chart(
+            data,
+            title=f"{stat} of the {top_btm} 5 Countries in the most recent year you selected",
+        )
         .mark_bar()
         .encode(y=alt.Y("country", sort="-x", title="Country"), x=stat, color="country")
         .transform_window(
@@ -244,8 +250,8 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
     else:
         data = gapminder
 
-    data = data[data["year"]]
-    data = get_topbtm_data(data, stat, top_btm)
+    data = get_topbtm_data(data, stat, top_btm, year)
+    data = data[(data["year"] >= f"{year[0]}") & (data["year"] <= f"{year[1]}")]
 
     zoom = alt.selection_interval(
         bind="scales",
@@ -267,15 +273,16 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
     return line.to_html()
 
 
-def get_topbtm_data(data, stat, top_btm):
+def get_topbtm_data(data, stat, top_btm, year):
+
     top_countries = list(
-        data.query("year == 2015")
+        data[data["year"] == f"{year[1]}"]
         .sort_values(by=stat, ascending=False)["country"]
         .head()
     )
 
     btm_countries = list(
-        data.query("year == 2015")
+        data[data["year"] == f"{year[1]}"]
         .sort_values(by=stat, ascending=True)["country"]
         .head()
     )
