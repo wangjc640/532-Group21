@@ -81,12 +81,13 @@ year = dcc.RangeSlider(
     min=1950,
     max=2018,
     value=[1965, 2000],
-    step=1e7,
+    step=1,
     marks={
         1950: {"label": "1950", "style": {"color": "white"}},
         1965: {"label": "1965", "style": {"color": "white"}},
         1980: {"label": "1980", "style": {"color": "white"}},
         2000: {"label": "2000", "style": {"color": "white"}},
+        2010: {"label": "2010", "style": {"color": "white"}},
         2018: {"label": "2018", "style": {"color": "white"}},
     },
 )
