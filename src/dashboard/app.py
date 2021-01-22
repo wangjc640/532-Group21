@@ -5,7 +5,9 @@ from dash.dependencies import Input, Output
 import altair as alt
 import dash_bootstrap_components as dbc
 import pandas as pd
-from src.dashboard import controls as ctrs
+
+# from src.dashboard import controls as ctrs
+import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
@@ -53,6 +55,11 @@ controls = dbc.Card(
         html.Hr(),
         # filter for year
         dbc.FormGroup([html.H5("6. Year", className="text-left"), ctrs.year]),
+        html.Hr(),
+        # filter for year
+        dbc.FormGroup(
+            [html.H5("7. Show me", className="text-left"), ctrs.five_countries]
+        ),
     ],
     color="secondary",
     inverse=True,
@@ -137,8 +144,9 @@ def get_subregion(region):
     Input("region", "value"),
     Input("sub_region", "value"),
     Input("income_grp", "value"),
+    Input("five_countries", "value"),
 )
-def plot_bar(stat, region, sub_region, income_grp):
+def plot_bar(stat, region, sub_region, income_grp, top_btm):
     alt.data_transformers.disable_max_rows()
     if region is not None and sub_region is not None and income_grp is not None:
         data = gapminder[
@@ -179,8 +187,11 @@ def plot_bar(stat, region, sub_region, income_grp):
         ]
     else:
         data = gapminder[(gapminder["year"] == "2015")]
+
+    data = get_topbtm_data(data, stat, top_btm)
+
     chart = (
-        alt.Chart(data, title=f"{stat} - Top 5 Countries")
+        alt.Chart(data, title=f"{stat} - {top_btm} 5 Countries")
         .mark_bar()
         .encode(y=alt.Y("country", sort="-x", title="Country"), x=stat, color="country")
         .transform_window(
@@ -198,8 +209,10 @@ def plot_bar(stat, region, sub_region, income_grp):
     Input("region", "value"),
     Input("sub_region", "value"),
     Input("income_grp", "value"),
+    Input("five_countries", "value"),
+    Input("year", "value"),
 )
-def plot_line(stat, region, sub_region, income_grp):
+def plot_line(stat, region, sub_region, income_grp, top_btm, year):
     alt.data_transformers.disable_max_rows()
 
     if region is not None and sub_region is not None and income_grp is not None:
@@ -230,24 +243,46 @@ def plot_line(stat, region, sub_region, income_grp):
     else:
         data = gapminder
 
+    data = get_topbtm_data(data, stat, top_btm)
+
+    zoom = alt.selection_interval(
+        bind="scales",
+        on="[mousedown[!event.shiftKey], mouseup] > mousemove",
+        translate="[mousedown[!event.shiftKey], mouseup] > mousemove!",
+    )
+
+    line = (
+        alt.Chart(data, title=f"{stat} Trend - {top_btm} 5 Countries")
+        .mark_line()
+        .encode(
+            alt.X("year:T", title="Year"),
+            alt.Y(stat),
+            color=alt.Color("country", sort="-y", title="Country"),
+            tooltip=stat,
+        )
+    ).add_selection(zoom)
+
+    return line.to_html()
+
+
+def get_topbtm_data(data, stat, top_btm):
     top_countries = list(
         data.query("year == 2015")
         .sort_values(by=stat, ascending=False)["country"]
         .head()
     )
 
-    data = data.query("country == @top_countries")
-
-    chart = (
-        alt.Chart(data, title=f"{stat} Trend - Top 5 Countries")
-        .mark_line()
-        .encode(
-            alt.X("year:T", title="Year"),
-            y=stat,
-            color=alt.Color("country", sort="-y", title="Country"),
-        )
+    btm_countries = list(
+        data.query("year == 2015")
+        .sort_values(by=stat, ascending=True)["country"]
+        .head()
     )
-    return chart.to_html()
+
+    if top_btm == "Top":
+        data = data.query("country == @top_countries")
+    else:
+        data = data.query("country == @btm_countries")
+    return data
 
 
 if __name__ == "__main__":

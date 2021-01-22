@@ -90,3 +90,20 @@ year = dcc.RangeSlider(
         2018: {"label": "2018", "style": {"color": "white"}},
     },
 )
+
+
+five_countries = dcc.RadioItems(
+    id="five_countries",
+    options=[
+        {
+            "label": "Top 5 countries based on my selection",
+            "value": "Top",
+        },
+        {
+            "label": "Bottom 5 countries based on my selection",
+            "value": "Bottom",
+        },
+    ],
+    value="Bottom",
+    labelStyle={"display": "block"},
+)
