@@ -36,7 +36,7 @@ vega_datasets
 ```
 3. To run the app locally, run the following command from the root of this repository   
    `python src/dashboard/app.py`
-4. Create an issue thread to discuss with the team about the changes/improvements you propose to make. [Here](CONTRIBUTING.md) is the detailed contribution guid.
+4. Create an issue thread to discuss with the team about the changes/improvements you propose to make. [Here](CONTRIBUTING.md) is the detailed contribution guide.
 
 
 
