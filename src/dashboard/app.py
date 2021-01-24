@@ -7,7 +7,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from vega_datasets import data as datasets
 
-import controls as ctrs
+from src.dashboard import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
