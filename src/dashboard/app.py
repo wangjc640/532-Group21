@@ -1,3 +1,8 @@
+"""
+This file contains all the components of the dashboard including layout,
+control filters and altair plots. 
+"""
+
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
