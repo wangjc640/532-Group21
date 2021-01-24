@@ -7,8 +7,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from vega_datasets import data as datasets
 
-# import controls as ctrs
-from src.dashboard import controls as ctrs
+import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
@@ -150,7 +149,7 @@ def get_subregion(region):
     --------
     region: string
         Selection from the Region filter
-    
+
     Returns
     --------
         Options list for sub region belonging to the selected region
@@ -197,7 +196,7 @@ def plot_map(stat, region, sub_region, income_grp, year):
         Selection from Income Group filter
     year: integer
         Year for which the data is displayed, from Year filter
-    
+
     Returns
     --------
     map_chart
@@ -261,7 +260,7 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
         Selection from Top/Bottom filter
     year: integer
         Year for which the data is displayed, from Year filter
-    
+
     Returns
     --------
     chart
@@ -327,7 +326,7 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
         Selection from Top/Bottom filter
     year: integer
         Year for which the data is displayed, from Year filter
-    
+
     Returns
     --------
     line
@@ -387,7 +386,7 @@ def get_topbtm_data(data, stat, top_btm, year):
         Selection from Top/Bottom filter
     year: integer
         Year for which the data is displayed, from Year filter
-    
+
     Returns
     --------
     data
@@ -428,7 +427,7 @@ def filter_data(region, sub_region, income_grp):
         Selection from Sub Region filter
     income_grp: string
         Selection from Income Group filter
-    
+
     Returns
     --------
     data
