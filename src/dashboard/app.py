@@ -144,6 +144,21 @@ app.layout = dbc.Container(
     Input("region", "value"),
 )
 def get_subregion(region):
+    """Select sub regions to display based on region filter selection
+
+    Parameters
+    --------
+    region: string
+        Selection from the Region filter
+    
+    Returns
+    --------
+        Options list for sub region belonging to the selected region
+
+    Example
+    --------
+    > get_subregion("Asia")
+    """
     if region is not None:
         subs = gapminder[gapminder["region"] == region]["sub_region"].unique()
         opts = []
@@ -167,6 +182,31 @@ def get_subregion(region):
     Input("year", "value"),
 )
 def plot_map(stat, region, sub_region, income_grp, year):
+    """
+    Create map plot for statsitic of interested based on selected filters
+
+    Parameters
+    --------
+    stat: string
+        Selection from statistic of interest filter
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+    
+    Returns
+    --------
+    map_chart
+        map chart showing statistic of interest for specific region, subregion, income group and year
+
+    Example
+    --------
+    > plot_map("education_ratio", "Asia", "Western Asia", "Lower middle", [1968, 2015])
+    """
     alt.data_transformers.disable_max_rows()
 
     # filter by Region, sub-region & Income group
@@ -204,6 +244,34 @@ def plot_map(stat, region, sub_region, income_grp, year):
     Input("year", "value"),
 )
 def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
+    """
+    Create bar chart for statsitic of interested based on selected filters, for top 5 or bottom 5 countries
+
+    Parameters
+    --------
+    stat: string
+        Selection from statistic of interest filter
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    top_btm: string
+        Selection from Top/Bottom filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+    
+    Returns
+    --------
+    chart
+        bar chart showing statistic of interest for top 5 or bottom 5 countries,
+        in specific region, subregion, income group and year
+
+    Example
+    --------
+    > plot_bar("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [1968, 2015])
+    """
     alt.data_transformers.disable_max_rows()
 
     # filter by Region, sub-region & Income group
@@ -242,6 +310,34 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
     Input("year", "value"),
 )
 def plot_line(stat, region, sub_region, income_grp, top_btm, year):
+    """
+    Create line chart for statsitic of interested based on selected filters, for top 5 or bottom 5 countries
+
+    Parameters
+    --------
+    stat: string
+        Selection from statistic of interest filter
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    top_btm: string
+        Selection from Top/Bottom filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+    
+    Returns
+    --------
+    line
+        line chart showing statistic of interest for top 5 or bottom 5 countries,
+        in specific region, subregion, income group and year range
+
+    Example
+    --------
+    > plot_line("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [1968, 2015])
+    """
     alt.data_transformers.disable_max_rows()
 
     # filter by Region, sub-region & Income group
@@ -278,7 +374,29 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
 
 
 def get_topbtm_data(data, stat, top_btm, year):
+    """
+    Filter data based on top 5 or bottom 5 countries selection
 
+    Parameters
+    --------
+    data: pandas dataframe
+        Data to be filtered
+    stat: string
+        Selection from statistic of interest filter
+    top_btm: string
+        Selection from Top/Bottom filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+    
+    Returns
+    --------
+    data
+        dataset that has been filtered by top 5 or bottom 5 countries
+
+    Example
+    --------
+    > get_topbtm_data(data, "education_ratio", "Bottom", [1968, 2015])
+    """
     top_countries = list(
         data[data["year"] == f"{year[1]}"]
         .sort_values(by=stat, ascending=False)["country"]
@@ -299,6 +417,27 @@ def get_topbtm_data(data, stat, top_btm, year):
 
 
 def filter_data(region, sub_region, income_grp):
+    """
+    Filter data based on region, sub region and income group selection
+
+    Parameters
+    --------
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    
+    Returns
+    --------
+    data
+        dataset that has been filtered on region, sub region and income group selection
+
+    Example
+    --------
+    > filter_data(d"Asia", "Western Asia", "Lower middle")
+    """
     if region is not None and sub_region is not None and income_grp is not None:
         data = gapminder[
             (gapminder["region"] == region)
