@@ -1,3 +1,8 @@
+"""
+This file contains all the components of the dashboard including layout,
+control filters and altair plots. 
+"""
+
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
@@ -5,13 +10,25 @@ from dash.dependencies import Input, Output
 import altair as alt
 import dash_bootstrap_components as dbc
 import pandas as pd
-import controls as ctrs
+from vega_datasets import data as datasets
+
+from src.dashboard import controls as ctrs
 
 # Read in global data
-gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates = ['year'])
+gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
+
+# Create dictionary for stat labels
+labels = {
+    "life_expectancy": "Life Expectancy",
+    "education_ratio": "Education Ratio",
+    "pop_density": "Population Density",
+    "child_mortality": "Child Mortality",
+    "children_per_woman": "Children per Woman",
+}
 
 # Setup app and layout/frontend
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 
 controls = dbc.Card(
@@ -52,10 +69,25 @@ controls = dbc.Card(
         html.Hr(),
         # filter for year
         dbc.FormGroup([html.H5("6. Year", className="text-left"), ctrs.year]),
+        html.Hr(),
+        # filter for year
+        dbc.FormGroup([html.H5("7. Show me", className="text-left"), ctrs.top_btm]),
+        html.Small(
+            "*Education Ratio calculated as # of years in school men / # of years in school women. Higher values indicate larger gap between the education levels for men and women."
+        ),
     ],
     color="secondary",
     inverse=True,
     body=True,
+)
+
+world_map = html.Iframe(
+    id="world_map",
+    style={
+        "border-width": "0",
+        "width": "100%",
+        "height": "600px",
+    },
 )
 
 bar = html.Iframe(
@@ -63,7 +95,7 @@ bar = html.Iframe(
     style={
         "border-width": "0",
         "width": "100%",
-        "height": "800px",
+        "height": "400px",
     },
 )
 
@@ -72,7 +104,7 @@ line = html.Iframe(
     style={
         "border-width": "0",
         "width": "100%",
-        "height": "800px",
+        "height": "400px",
     },
 )
 
@@ -94,11 +126,11 @@ app.layout = dbc.Container(
                 dbc.Col(controls, md=4),
                 dbc.Col(
                     [
-                        dbc.Row(dbc.Col(dcc.Graph(id="cluster-graph2"))),
+                        dbc.Row(world_map, align="center"),
+                        dbc.Row([dbc.Col([bar], md=6), dbc.Col([line], md=6)]),
                         html.Small(
                             "Note: empty plots mean that we don't have data based on your selection"
                         ),
-                        dbc.Row([dbc.Col([bar], md=6), dbc.Col([line], md=6)]),
                     ],
                     md=8,
                 ),
@@ -116,92 +148,300 @@ app.layout = dbc.Container(
     Input("region", "value"),
 )
 def get_subregion(region):
+    """Select sub regions to display based on region filter selection
+
+    Parameters
+    --------
+    region: string
+        Selection from the Region filter
+
+    Returns
+    --------
+        Options list for sub region belonging to the selected region
+
+    Example
+    --------
+    > get_subregion("Asia")
+    """
     if region is not None:
         subs = gapminder[gapminder["region"] == region]["sub_region"].unique()
         opts = []
         for s in subs:
-            opts.append({"label": s, "value": s})    
-    else: 
-        opts=[{"label": sub_reg, "value": sub_reg} for sub_reg in gapminder["sub_region"].unique()]
-    return opts    
+            opts.append({"label": s, "value": s})
+    else:
+        opts = [
+            {"label": sub_reg, "value": sub_reg}
+            for sub_reg in gapminder["sub_region"].unique()
+        ]
+    return opts
 
 
 # Set up callbacks/backend
+@app.callback(
+    Output("world_map", "srcDoc"),
+    Input("stat", "value"),
+    Input("region", "value"),
+    Input("sub_region", "value"),
+    Input("income_grp", "value"),
+    Input("year", "value"),
+)
+def plot_map(stat, region, sub_region, income_grp, year):
+    """
+    Create map plot for statsitic of interested based on selected filters
+
+    Parameters
+    --------
+    stat: string
+        Selection from statistic of interest filter
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+
+    Returns
+    --------
+    map_chart
+        map chart showing statistic of interest for specific region, subregion, income group and year
+
+    Example
+    --------
+    > plot_map("education_ratio", "Asia", "Western Asia", "Lower middle", [1968, 2015])
+    """
+    alt.data_transformers.disable_max_rows()
+
+    # filter by Region, sub-region & Income group
+    data = filter_data(region, sub_region, income_grp)
+
+    # filter on year
+    data = data[(data["year"] == f"{year[1]}")]
+
+    # create world_map
+    world_map = alt.topo_feature(datasets.world_110m.url, "countries")
+
+    map_chart = (
+        alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
+        .mark_geoshape()
+        .transform_lookup(
+            lookup="id", from_=alt.LookupData(data, key="id", fields=["name", stat])
+        )
+        .encode(
+            tooltip=["name:O", stat + ":Q"],
+            color=alt.Color(stat + ":Q", title=f"{labels[stat]}"),
+        )
+        .project(type="equalEarth")
+        .properties(width=1400, height=500)
+    )
+    return map_chart.to_html()
+
+
 @app.callback(
     Output("bar", "srcDoc"),
     Input("stat", "value"),
     Input("region", "value"),
     Input("sub_region", "value"),
     Input("income_grp", "value"),
+    Input("top_btm", "value"),
+    Input("year", "value"),
 )
-def plot_bar(stat, region, sub_region, income_grp):
+def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
+    """
+    Create bar chart for statsitic of interested based on selected filters, for top 5 or bottom 5 countries
+
+    Parameters
+    --------
+    stat: string
+        Selection from statistic of interest filter
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    top_btm: string
+        Selection from Top/Bottom filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+
+    Returns
+    --------
+    chart
+        bar chart showing statistic of interest for top 5 or bottom 5 countries,
+        in specific region, subregion, income group and year
+
+    Example
+    --------
+    > plot_bar("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [1968, 2015])
+    """
     alt.data_transformers.disable_max_rows()
-    if region is not None and sub_region is not None and income_grp is not None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["region"] == region)
-            & (gapminder["sub_region"] == sub_region)
-            & (gapminder["income_group"] == income_grp)
-        ]
-    elif region is not None and sub_region is None and income_grp is None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["region"] == region)
-        ]
-    elif region is None and sub_region is not None and income_grp is None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["sub_region"] == sub_region)
-        ]
-    elif region is None and sub_region is None and income_grp is not None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["income_group"] == income_grp)
-        ]
-    elif region is not None and sub_region is not None and income_grp is None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["region"] == region)
-            & (gapminder["sub_region"] == sub_region)
-        ]
-    elif region is None and sub_region is not None and income_grp is not None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["sub_region"] == sub_region)
-            & (gapminder["income_group"] == income_grp)
-        ]
-    elif region is not None and sub_region is None and income_grp is not None:
-        data = gapminder[
-            (gapminder["year"] == "2015") 
-            & (gapminder["region"] == region)
-            & (gapminder["income_group"] == income_grp)
-        ]
-    else:
-        data = gapminder[
-            (gapminder["year"] == "2015")
-        ]
+
+    # filter by Region, sub-region & Income group
+    data = filter_data(region, sub_region, income_grp)
+
+    # filter on year
+    data = data[(data["year"] == f"{year[1]}")]
+
+    # filter on top/bottom selection
+    data = get_topbtm_data(data, stat, top_btm, year)
+
     chart = (
-        alt.Chart(data, title = f"{stat} - Top 5 Countries")
-        .mark_bar()
-        .encode(y=alt.Y("country", sort="-x", title = "Country"), x=stat, color="country")
-        .transform_window(
-            rank="rank(stat)",
-            sort=[alt.SortField(stat, order="descending")],
+        alt.Chart(
+            data,
+            title=f"{labels[stat]} - {top_btm} 5 Countries for {year[1]}",
         )
-        .transform_filter((alt.datum.rank < 6))
+        .mark_bar()
+        .encode(
+            y=alt.Y("country", sort="-x", title="Country"),
+            x=alt.X(stat, title=labels[stat]),
+            color=alt.Color("country", title="Country"),
+            tooltip=("name:O", stat + ":Q"),
+        )
+        .properties(width=400, height=300)
     )
     return chart.to_html()
+
 
 @app.callback(
     Output("line", "srcDoc"),
     Input("stat", "value"),
     Input("region", "value"),
     Input("sub_region", "value"),
-    Input("income_grp", "value")
+    Input("income_grp", "value"),
+    Input("top_btm", "value"),
+    Input("year", "value"),
 )
-def plot_line(stat, region, sub_region, income_grp):
-    alt.data_transformers.disable_max_rows()  
-    
+def plot_line(stat, region, sub_region, income_grp, top_btm, year):
+    """
+    Create line chart for statsitic of interested based on selected filters, for top 5 or bottom 5 countries
+
+    Parameters
+    --------
+    stat: string
+        Selection from statistic of interest filter
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+    top_btm: string
+        Selection from Top/Bottom filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+
+    Returns
+    --------
+    line
+        line chart showing statistic of interest for top 5 or bottom 5 countries,
+        in specific region, subregion, income group and year range
+
+    Example
+    --------
+    > plot_line("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [1968, 2015])
+    """
+    alt.data_transformers.disable_max_rows()
+
+    # filter by Region, sub-region & Income group
+    data = filter_data(region, sub_region, income_grp)
+
+    # filter on top/bottom selection
+    data = get_topbtm_data(data, stat, top_btm, year)
+
+    # filter on year
+    data = data[(data["year"] >= f"{year[0]}") & (data["year"] <= f"{year[1]}")]
+
+    zoom = alt.selection_interval(
+        bind="scales",
+        on="[mousedown[!event.shiftKey], mouseup] > mousemove",
+        translate="[mousedown[!event.shiftKey], mouseup] > mousemove!",
+    )
+
+    line = (
+        alt.Chart(
+            data,
+            title=f"{labels[stat]} Trend - {top_btm} 5 Countries from {year[0]} - {year[1]}",
+        )
+        .mark_line()
+        .encode(
+            alt.X("year:T", title="Year"),
+            alt.Y(stat, title=labels[stat]),
+            color=alt.Color("country", sort="-y", title="Country"),
+            tooltip=("name:O", stat + ":Q"),
+        )
+        .properties(width=400, height=300)
+    ).add_selection(zoom)
+
+    return line.to_html()
+
+
+def get_topbtm_data(data, stat, top_btm, year):
+    """
+    Filter data based on top 5 or bottom 5 countries selection
+
+    Parameters
+    --------
+    data: pandas dataframe
+        Data to be filtered
+    stat: string
+        Selection from statistic of interest filter
+    top_btm: string
+        Selection from Top/Bottom filter
+    year: integer
+        Year for which the data is displayed, from Year filter
+
+    Returns
+    --------
+    data
+        dataset that has been filtered by top 5 or bottom 5 countries
+
+    Example
+    --------
+    > get_topbtm_data(data, "education_ratio", "Bottom", [1968, 2015])
+    """
+    top_countries = list(
+        data[data["year"] == f"{year[1]}"]
+        .sort_values(by=stat, ascending=False)["country"]
+        .head()
+    )
+
+    btm_countries = list(
+        data[data["year"] == f"{year[1]}"]
+        .sort_values(by=stat, ascending=True)["country"]
+        .head()
+    )
+
+    if top_btm == "Top":
+        data = data.query("country == @top_countries")
+    else:
+        data = data.query("country == @btm_countries")
+    return data
+
+
+def filter_data(region, sub_region, income_grp):
+    """
+    Filter data based on region, sub region and income group selection
+
+    Parameters
+    --------
+    region: string
+        Selection from the Region filter
+    sub_region: sting
+        Selection from Sub Region filter
+    income_grp: string
+        Selection from Income Group filter
+
+    Returns
+    --------
+    data
+        dataset that has been filtered on region, sub region and income group selection
+
+    Example
+    --------
+    > filter_data(d"Asia", "Western Asia", "Lower middle")
+    """
     if region is not None and sub_region is not None and income_grp is not None:
         data = gapminder[
             (gapminder["region"] == region)
@@ -209,21 +449,14 @@ def plot_line(stat, region, sub_region, income_grp):
             & (gapminder["income_group"] == income_grp)
         ]
     elif region is not None and sub_region is None and income_grp is None:
-        data = gapminder[
-            (gapminder["region"] == region)
-        ]
+        data = gapminder[(gapminder["region"] == region)]
     elif region is None and sub_region is not None and income_grp is None:
-        data = gapminder[
-            (gapminder["sub_region"] == sub_region)
-        ]
+        data = gapminder[(gapminder["sub_region"] == sub_region)]
     elif region is None and sub_region is None and income_grp is not None:
-        data = gapminder[
-            (gapminder["income_group"] == income_grp)
-        ]
+        data = gapminder[(gapminder["income_group"] == income_grp)]
     elif region is not None and sub_region is not None and income_grp is None:
         data = gapminder[
-            (gapminder["region"] == region)
-            & (gapminder["sub_region"] == sub_region)
+            (gapminder["region"] == region) & (gapminder["sub_region"] == sub_region)
         ]
     elif region is None and sub_region is not None and income_grp is not None:
         data = gapminder[
@@ -232,22 +465,12 @@ def plot_line(stat, region, sub_region, income_grp):
         ]
     elif region is not None and sub_region is None and income_grp is not None:
         data = gapminder[
-            (gapminder["region"] == region)
-            & (gapminder["income_group"] == income_grp)
+            (gapminder["region"] == region) & (gapminder["income_group"] == income_grp)
         ]
     else:
         data = gapminder
-    
-    top_countries = list(data.query("year == 2015").sort_values(by = stat,  ascending=False)["country"].head())
+    return data
 
-    data = data.query("country == @top_countries")
-
-    chart = (
-        alt.Chart(data, title = f"{stat} Trend - Top 5 Countries")
-        .mark_line()
-        .encode(alt.X("year:T", title = "Year"), y=stat, color = alt.Color("country", sort="-y", title = "Country"))
-    )
-    return chart.to_html()
 
 if __name__ == "__main__":
     app.run_server(debug=True)
