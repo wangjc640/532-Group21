@@ -236,6 +236,8 @@ def plot_map(stat, region, sub_region, income_grp, year):
             tooltip=["name:O", stat + ":Q"],
             color=alt.Color(stat + ":Q", title=f"{labels[stat]}"),
         )
+        .configure_title(fontSize=17)
+        .configure_legend(labelFontSize=12)
         .project(type="equalEarth")
         .properties(width=1400, height=500)
     )
@@ -303,6 +305,9 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
             color=alt.Color("country", title="Country"),
             tooltip=("name:O", stat + ":Q"),
         )
+        .configure_axis(labelFontSize=12,  titleFontSize=14)
+        .configure_title(fontSize=15)
+        .configure_legend(labelFontSize=12)
         .properties(width=400, height=300)
     )
     return chart.to_html()
@@ -375,6 +380,9 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
             color=alt.Color("country", sort="-y", title="Country"),
             tooltip=("name:O", stat + ":Q"),
         )
+        .configure_axis(labelFontSize=12,  titleFontSize=14)
+        .configure_title(fontSize=15)
+        .configure_legend(labelFontSize=12)
         .properties(width=400, height=300)
     ).add_selection(zoom)
 
