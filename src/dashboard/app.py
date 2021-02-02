@@ -187,9 +187,10 @@ def get_subregion(region):
     Input("region", "value"),
     Input("sub_region", "value"),
     Input("income_grp", "value"),
+    Input("pop_size", "value"),
     Input("year", "value"),
 )
-def plot_map(stat, region, sub_region, income_grp, year):
+def plot_map(stat, region, sub_region, income_grp, pop_size, year):
     """
     Create map plot for statsitic of interested based on selected filters
 
@@ -203,6 +204,8 @@ def plot_map(stat, region, sub_region, income_grp, year):
         Selection from Sub Region filter
     income_grp: string
         Selection from Income Group filter
+    pop_size: integer
+        Population size for which the data is displayed, from Population Size filter
     year: integer
         Year for which the data is displayed, from Year filter
 
@@ -213,13 +216,16 @@ def plot_map(stat, region, sub_region, income_grp, year):
 
     Example
     --------
-    > plot_map("education_ratio", "Asia", "Western Asia", "Lower middle", [1968, 2015])
+    > plot_map("education_ratio", "Asia", "Western Asia", "Lower middle", [10_000, 1_000_000], [1968, 2015])
     """
     alt.data_transformers.disable_max_rows()
 
     # filter by Region, sub-region & Income group
     data = filter_data(region, sub_region, income_grp)
 
+    # filter on pop_size
+    data = filter_popsize(data, pop_size)
+    
     # filter on year
     data = data[(data["year"] == f"{year[1]}")]
 
@@ -251,9 +257,10 @@ def plot_map(stat, region, sub_region, income_grp, year):
     Input("sub_region", "value"),
     Input("income_grp", "value"),
     Input("top_btm", "value"),
+    Input("pop_size", "value"),
     Input("year", "value"),
 )
-def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
+def plot_bar(stat, region, sub_region, income_grp, top_btm, pop_size, year):
     """
     Create bar chart for statsitic of interested based on selected filters, for top 5 or bottom 5 countries
 
@@ -269,6 +276,8 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
         Selection from Income Group filter
     top_btm: string
         Selection from Top/Bottom filter
+    pop_size: integer
+        Population size for which the data is displayed, from Population Size filter
     year: integer
         Year for which the data is displayed, from Year filter
 
@@ -280,12 +289,15 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
 
     Example
     --------
-    > plot_bar("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [1968, 2015])
+    > plot_bar("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom",  [10_000, 1_000_000], [1968, 2015])
     """
     alt.data_transformers.disable_max_rows()
 
     # filter by Region, sub-region & Income group
     data = filter_data(region, sub_region, income_grp)
+
+    # filter on pop_size
+    data = filter_popsize(data, pop_size)
 
     # filter on year
     data = data[(data["year"] == f"{year[1]}")]
@@ -320,9 +332,10 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, year):
     Input("sub_region", "value"),
     Input("income_grp", "value"),
     Input("top_btm", "value"),
+    Input("pop_size", "value"),
     Input("year", "value"),
 )
-def plot_line(stat, region, sub_region, income_grp, top_btm, year):
+def plot_line(stat, region, sub_region, income_grp, top_btm, pop_size, year):
     """
     Create line chart for statsitic of interested based on selected filters, for top 5 or bottom 5 countries
 
@@ -338,6 +351,8 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
         Selection from Income Group filter
     top_btm: string
         Selection from Top/Bottom filter
+    pop_size: integer
+        Population size for which the data is displayed, from Population Size filter
     year: integer
         Year for which the data is displayed, from Year filter
 
@@ -349,12 +364,15 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, year):
 
     Example
     --------
-    > plot_line("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [1968, 2015])
+    > plot_line("education_ratio", "Asia", "Western Asia", "Lower middle", "Bottom", [10_000, 1_000_000], [1968, 2015])
     """
     alt.data_transformers.disable_max_rows()
 
     # filter by Region, sub-region & Income group
     data = filter_data(region, sub_region, income_grp)
+
+    # filter on pop_size
+    data = filter_popsize(data, pop_size)
 
     # filter on top/bottom selection
     data = get_topbtm_data(data, stat, top_btm, year)
@@ -481,6 +499,35 @@ def filter_data(region, sub_region, income_grp):
         ]
     else:
         data = gapminder
+    return data
+
+def filter_popsize(data, pop_size):
+    """
+    Filter data based on population size selection
+
+    Parameters
+    --------
+    data: pandas dataframe
+        Data to be filtered
+    pop_size: int
+        Selection from statistic of interest filter
+
+    Returns
+    --------
+    data
+        dataset that has been filtered on population size selection
+
+    Example
+    --------
+    > filter_popsize(data, [10_000, 1_000_000])
+    """
+    # if 200M is selected, don't filter on a upper limit
+    if pop_size[1] == 200_000_000:
+        # if 200M+ is selected, don't filter on a upper limit
+        data = data[(data["population"] >= pop_size[0])]
+    else:    
+        data = data[(data["population"] >= pop_size[0]) & (data["population"] <= pop_size[1])]
+    
     return data
 
 
