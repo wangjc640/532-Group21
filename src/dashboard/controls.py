@@ -25,10 +25,10 @@ stat = dcc.RadioItems(
             "value": "life_expectancy",
         },
         {
-            "label": "Education Ratio",
+            "label": "Education Ratio *",
             "value": "education_ratio",
         },
-        {"label": "Population Density", "value": "pop_density"},
+        {"label": "Population Density **", "value": "pop_density"},
         {
             "label": "Child Mortality",
             "value": "child_mortality",

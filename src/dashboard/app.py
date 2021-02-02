@@ -12,7 +12,8 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from vega_datasets import data as datasets
 
-from src.dashboard import controls as ctrs
+import controls as ctrs
+#from src.dashboard import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
@@ -73,7 +74,10 @@ controls = dbc.Card(
         # filter for year
         dbc.FormGroup([html.H5("7. Show me", className="text-left"), ctrs.top_btm]),
         html.Small(
-            "*Education Ratio calculated as # of years in school men / # of years in school women. Higher values indicate larger gap between the education levels for men and women."
+            "* Education Ratio calculated as # of years in school men / # of years in school women. Higher values indicate larger gap between the education levels for men and women."
+        ),
+        html.Small(
+            "** Population Density (per square km).  Average number of people on each square km of land in the given country. "
         ),
     ],
     color="secondary",
