@@ -225,27 +225,39 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
 
     # filter on pop_size
     data = filter_popsize(data, pop_size)
-    
+
     # filter on year
     data = data[(data["year"] == f"{year[1]}")]
+    data_for_map = gapminder.query("sub_region == @sub_region & year == @year[1]")
+    data_for_map = data_for_map.drop_duplicates(subset=['country'])
+
 
     # create world_map
     world_map = alt.topo_feature(datasets.world_110m.url, "countries")
+    
+    background = (alt.Chart(world_map).mark_geoshape(
+        fill='#2a1d0c', stroke='#706545', strokeWidth=1
+        ).project(type='equalEarth'))
 
-    map_chart = (
-        alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
-        .mark_geoshape()
+    main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
+    .mark_geoshape(stroke="black")
         .transform_lookup(
-            lookup="id", from_=alt.LookupData(data, key="id", fields=["name", stat])
+            lookup="id", from_=alt.LookupData(data_for_map, key="id", fields=["name", stat])
         )
         .encode(
             tooltip=["name:O", stat + ":Q"],
             color=alt.Color(stat + ":Q", title=f"{labels[stat]}"),
         )
+        #.interactive()
         .configure_title(fontSize=17)
         .configure_legend(labelFontSize=12)
         .project(type="equalEarth")
         .properties(width=1400, height=500)
+        )
+
+
+    map_chart = (
+        main_map 
     )
     return map_chart.to_html()
 
