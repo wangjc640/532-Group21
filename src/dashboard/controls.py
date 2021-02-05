@@ -70,7 +70,7 @@ pop_size = dcc.RangeSlider(
     id="pop_size",
     min=1e4,
     max=1_500_000_000,
-    value=[200_000_000, 1_100_000_000],
+    value=[10_000, 1_500_000_000],
     step=1e7,
     marks={
         10_000: {"label": "10, 000", "style": {"color": "white"}},

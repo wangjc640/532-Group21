@@ -220,77 +220,57 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
     > plot_map("education_ratio", "Asia", "Western Asia", "Lower middle", [10_000, 1_000_000], [1968, 2015])
     """
     alt.data_transformers.disable_max_rows()
-
-    # filter by Region, sub-region & Income group
     data = filter_data(region, sub_region, income_grp)
-
-    # filter on pop_size
     data = filter_popsize(data, pop_size)
-
-    # filter on year
     data = data[(data["year"] == f"{year[1]}")]
-    data_for_map = gapminder.query("sub_region == @sub_region & year == @year[1]")
-    data_for_map = data_for_map.drop_duplicates(subset=['country'])
-
 
     # create world_map
     world_map = alt.topo_feature(datasets.world_110m.url, "countries")
     
-    background = (alt.Chart(world_map).mark_geoshape(
-        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
-        ).project(type='equalEarth', scale = 200).properties(width=1000, height=700))
+
+    
+    
+    main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
+                    .mark_geoshape(stroke="black")
+                    .transform_lookup(lookup="id", from_=alt.LookupData(data, key="id", fields=["name", stat]))
+                    .encode(tooltip=["name:O", stat + ":Q"], color=alt.Color(stat + ":Q", title=f"{labels[stat]}"))
+                    .configure_title(fontSize=17)
+                    .configure_legend(labelFontSize=12)
+                    .project(type="equalEarth")
+                    .properties(width=1000, height=500)
+                )
+    
+    if(region is not None and sub_region is None):
+        s = None
+        t = None
+        if(region == "Europe"):
+            s = 800
+            t = [150, 1010]
+        if(region == "Asia"):
+            s = 500
+            t = [-200, 500]
+        if(region == "Africa"):
+            s = 500
+            t = [400, 300]
+        if(region == "Americas"):
+            s = 300
+            t = [1000, 350]
+        if(region == "Oceania"):
+            s = 500
+            t = [-400, 0]
+
+        main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
+                        .mark_geoshape(stroke="black")
+                        .transform_lookup(lookup="id", from_=alt.LookupData(data, key="id", fields=["name", stat])
+                        ).encode(tooltip=["name:O", stat + ":Q"], color=alt.Color(stat + ":Q", title=f"{labels[stat]}"))
+                        .configure_title(fontSize=17)
+                        .configure_legend(labelFontSize=12)
+                        .project(type='naturalEarth1', scale=s, translate=t) 
+                        .properties(width=1000, height=700))
     
 
-    main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
-    .mark_geoshape(stroke="black")
-        .transform_lookup(
-            lookup="id", from_=alt.LookupData(data_for_map, key="id", fields=["name", stat])
-        )
-        .encode(
-            tooltip=["name:O", stat + ":Q"],
-            color=alt.Color(stat + ":Q", title=f"{labels[stat]}"),
-        )
-        #.interactive()
-        .configure_title(fontSize=17)
-        .configure_legend(labelFontSize=12)
-        .project(type="equalEarth")
-        .properties(width=1400, height=500)
-        )
-    if(sub_region is None) :
-        main_map = background
-
-    if(region is not None and sub_region is None):
-        if(region == "Europe"):
-            main_map = (alt.Chart(world_map).mark_geoshape(
-                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
-                            ).project(type='naturalEarth1', scale=800, translate=[150, 1010])  
-                            .properties(width=1000, height=700))
-        
-        if(region == "Asia"):
-            main_map = (alt.Chart(world_map).mark_geoshape(
-                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
-                            ).project(type='naturalEarth1', scale=500, translate=[-200, 500])  
-                            .properties(width=1000, height=700))
-
-        if(region == "Africa"):
-            main_map = (alt.Chart(world_map).mark_geoshape(
-                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
-                            ).project(type='naturalEarth1', scale=500, translate=[400, 300])  
-                            .properties(width=1000, height=700))
-        
-        if(region == "Americas"):
-            main_map = (alt.Chart(world_map).mark_geoshape(
-                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
-                            ).project(type='naturalEarth1', scale=300, translate=[1000, 350])  
-                            .properties(width=1000, height=700))
-
-        if(region == "Oceania"):
-            main_map = (alt.Chart(world_map).mark_geoshape(
-                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
-                            ).project(type='naturalEarth1', scale=500, translate=[-400, 0])  
-                            .properties(width=1000, height=700))
-        
-
+    
+    
     map_chart = (
         main_map 
     )
