@@ -237,8 +237,9 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
     world_map = alt.topo_feature(datasets.world_110m.url, "countries")
     
     background = (alt.Chart(world_map).mark_geoshape(
-        fill='#2a1d0c', stroke='#706545', strokeWidth=1
-        ).project(type='equalEarth'))
+        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
+        ).project(type='equalEarth', scale = 200).properties(width=1000, height=700))
+    
 
     main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
     .mark_geoshape(stroke="black")
@@ -255,7 +256,40 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
         .project(type="equalEarth")
         .properties(width=1400, height=500)
         )
+    if(sub_region is None) :
+        main_map = background
 
+    if(region is not None and sub_region is None):
+        if(region == "Europe"):
+            main_map = (alt.Chart(world_map).mark_geoshape(
+                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
+                            ).project(type='naturalEarth1', scale=800, translate=[150, 1010])  
+                            .properties(width=1000, height=700))
+        
+        if(region == "Asia"):
+            main_map = (alt.Chart(world_map).mark_geoshape(
+                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
+                            ).project(type='naturalEarth1', scale=500, translate=[-200, 500])  
+                            .properties(width=1000, height=700))
+
+        if(region == "Africa"):
+            main_map = (alt.Chart(world_map).mark_geoshape(
+                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
+                            ).project(type='naturalEarth1', scale=500, translate=[400, 300])  
+                            .properties(width=1000, height=700))
+        
+        if(region == "Americas"):
+            main_map = (alt.Chart(world_map).mark_geoshape(
+                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
+                            ).project(type='naturalEarth1', scale=300, translate=[1000, 350])  
+                            .properties(width=1000, height=700))
+
+        if(region == "Oceania"):
+            main_map = (alt.Chart(world_map).mark_geoshape(
+                        fill='#2a1d0c', stroke='#706545', strokeWidth=0.5
+                            ).project(type='naturalEarth1', scale=500, translate=[-400, 0])  
+                            .properties(width=1000, height=700))
+        
 
     map_chart = (
         main_map 
