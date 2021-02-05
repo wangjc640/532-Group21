@@ -22,7 +22,7 @@ stat = dcc.RadioItems(
     id="stat",
     options=[
         {
-            "label": "Life Expectancy",
+            "label": "Life Expectancy (test)",
             "value": "life_expectancy",
         },
         {
