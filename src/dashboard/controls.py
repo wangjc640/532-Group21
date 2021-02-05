@@ -12,6 +12,7 @@ import pandas as pd
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv")
 
+
 txt_stl = {
     "width": "350px",
     "color": "#212121",

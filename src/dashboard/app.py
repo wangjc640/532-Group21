@@ -18,6 +18,7 @@ import controls as ctrs
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
 
+
 # Create dictionary for stat labels
 labels = {
     "life_expectancy": "Life Expectancy",
@@ -360,7 +361,9 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, pop_size, year):
         .encode(
             y=alt.Y("country", sort="-x", title="Country"),
             x=alt.X(stat, title=labels[stat]),
-            color=alt.Color("country", title="Country"),
+            color=alt.Color("country", 
+                            sort=alt.EncodingSortField("country", order='descending'),
+                            title="Country"),
             tooltip=("name:O", stat + ":Q"),
         )
         .configure_axis(labelFontSize=12,  titleFontSize=14)
@@ -441,7 +444,10 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, pop_size, year):
         .encode(
             alt.X("year:T", title="Year"),
             alt.Y(stat, title=labels[stat]),
-            color=alt.Color("country", sort="-y", title="Country"),
+            color=alt.Color("country", 
+                            sort=alt.EncodingSortField("country", order='descending'),
+                            #sort="-y",
+                            title="Country"),
             tooltip=("name:O", stat + ":Q"),
         )
         .configure_axis(labelFontSize=12,  titleFontSize=14)
