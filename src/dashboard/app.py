@@ -219,7 +219,7 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
     --------
     > plot_map("education_ratio", "Asia", "Western Asia", "Lower middle", [10_000, 1_000_000], [1968, 2015])
     """
-    worldmap_data = data_filter(stat, region, sub_region, income_grp)
+    worldmap_data = data_filter(stat, region, sub_region, income_grp, year, pop_size)
     alt.data_transformers.disable_max_rows()
     data = filter_data(region, sub_region, income_grp)
     data = filter_popsize(data, pop_size)
@@ -269,15 +269,26 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
                         .project(type='naturalEarth1', scale=s, translate=t) 
                         .properties(width=1000, height=700))
     
+    elif(income_grp is not None):
+        main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
+                    .mark_geoshape(stroke="black")
+                    .transform_lookup(lookup="id", from_=alt.LookupData(worldmap_data, key="id", fields=["name", stat]))
+                    .encode(tooltip=["name:O", stat + ":Q"], color=alt.Color(stat + ":Q", title=f"{labels[stat]}"))
+                    .configure_title(fontSize=17)
+                    .configure_legend(labelFontSize=12)
+                    .project(type="equalEarth")
+                    .properties(width=1000, height=500)
+                    )
+    
+    
 
-    
-    
     map_chart = (
         main_map 
     )
+    #test(stat, region, sub_region, income_grp, year, pop_size)
     return map_chart.to_html()
 
-def data_filter(stat, region, sub_region, income_grp): #year, pop
+def data_filter(stat, region, sub_region, income_grp, year, pop_size): #year, pop
     target = gapminder.copy()
     compensate = gapminder.copy()
     if (sub_region is not None):
@@ -290,20 +301,30 @@ def data_filter(stat, region, sub_region, income_grp): #year, pop
     if (income_grp is not None):
         if(sub_region is not None):
             target = gapminder[(gapminder["sub_region"] == sub_region) & (gapminder["income_group"] == income_grp)]
-            compensate = gapminder[(gapminder["sub_region"] != sub_region) & (gapminder["income_group"] != income_grp)]
+            compensate = gapminder[(gapminder["sub_region"] != sub_region)]
+            compensate = compensate[(compensate["income_group"] != income_grp)]
         elif(region is not None):
             target = gapminder[(gapminder["region"] == region) & (gapminder["income_group"] == income_grp)]
-            compensate = gapminder[(gapminder["region"] != region) & (gapminder["income_group"] != income_grp)]
+            compensate = gapminder[(gapminder["region"] != region)]
+            compensate = compensate[(compensate["income_group"] != income_grp)]
         else:
             target = gapminder[gapminder["income_group"] == income_grp]
             compensate = gapminder[gapminder["income_group"] != income_grp]
 
-    target = target.dropna()
+    target = target.dropna() 
     compensate = compensate.dropna()
     compensate[stat] = -1
     data = pd.concat([target,compensate])
-    print(compensate)
+
+    #print(target)
     return data
+
+def test(stat, region, sub_region, income_grp, year, pop_size):
+    target = gapminder[(gapminder["sub_region"] == sub_region ) & (gapminder["region"] == region) & (gapminder["income_group"] == income_grp)]
+    target = target[(target["population"] >= pop_size[0]) & (target["population"] <= pop_size[1])]
+    target = target[(target["year"] >= year[0]) & (target["year"] <= year[1])]
+    print(target)
+
 
 
 @app.callback(
