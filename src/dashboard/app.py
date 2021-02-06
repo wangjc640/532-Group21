@@ -32,7 +32,7 @@ labels = {
 }
 
 # Setup app and layout/frontend
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, title = "GapExpresser", external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
 
