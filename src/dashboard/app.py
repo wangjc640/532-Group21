@@ -12,8 +12,8 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from vega_datasets import data as datasets
 
-import controls as ctrs
-#from src.dashboard import controls as ctrs
+# import controls as ctrs
+from src.dashboard import controls as ctrs
 
 # Read in global data
 gapminder = pd.read_csv("data/processed/gapminder_processed.csv", parse_dates=["year"])
@@ -226,8 +226,7 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
     data = data[(data["year"] == f"{year[1]}")]
 
     # create world_map
-    world_map = alt.topo_feature(datasets.world_110m.url, "countries")
-    
+    world_map = alt.topo_feature(datasets.world_110m.url, "countries")  
 
     
     if((region is None) & (sub_region is None) &(income_grp is None)):
@@ -242,23 +241,25 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
                     )
     
     if(region is not None): #and sub_region is None
+
         s = None
         t = None
-        if(region == "Europe"):
+        if region == "Europe":
             s = 800
             t = [150, 1010]
-        if(region == "Asia"):
+        if region == "Asia":
             s = 500
             t = [-200, 500]
-        if(region == "Africa"):
+        if region == "Africa":
             s = 500
             t = [400, 300]
-        if(region == "Americas"):
+        if region == "Americas":
             s = 300
             t = [1000, 350]
-        if(region == "Oceania"):
+        if region == "Oceania":
             s = 500
             t = [-400, 0]
+
 
         main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
                         .mark_geoshape(stroke="black")
@@ -391,12 +392,14 @@ def plot_bar(stat, region, sub_region, income_grp, top_btm, pop_size, year):
         .encode(
             y=alt.Y("country", sort="-x", title="Country"),
             x=alt.X(stat, title=labels[stat]),
-            color=alt.Color("country", 
-                            sort=alt.EncodingSortField("country", order='descending'),
-                            title="Country"),
+            color=alt.Color(
+                "country",
+                sort=alt.EncodingSortField("country", order="descending"),
+                title="Country",
+            ),
             tooltip=("name:O", stat + ":Q"),
         )
-        .configure_axis(labelFontSize=12,  titleFontSize=14)
+        .configure_axis(labelFontSize=12, titleFontSize=14)
         .configure_title(fontSize=15)
         .configure_legend(labelFontSize=12)
         .properties(width=400, height=300)
@@ -476,13 +479,15 @@ def plot_line(stat, region, sub_region, income_grp, top_btm, pop_size, year):
         .encode(
             alt.X("year:T", title="Year"),
             alt.Y(stat, title=labels[stat]),
-            color=alt.Color("country", 
-                            sort=alt.EncodingSortField("country", order='descending'),
-                            #sort="-y",
-                            title="Country"),
+            color=alt.Color(
+                "country",
+                sort=alt.EncodingSortField("country", order="descending"),
+                # sort="-y",
+                title="Country",
+            ),
             tooltip=("name:O", stat + ":Q"),
         )
-        .configure_axis(labelFontSize=12,  titleFontSize=14)
+        .configure_axis(labelFontSize=12, titleFontSize=14)
         .configure_title(fontSize=15)
         .configure_legend(labelFontSize=12)
         .properties(width=400, height=300)
@@ -586,6 +591,7 @@ def filter_data(region, sub_region, income_grp):
         data = gapminder
     return data
 
+
 def filter_popsize(data, pop_size):
     """
     Filter data based on population size selection
@@ -610,11 +616,13 @@ def filter_popsize(data, pop_size):
     if pop_size[1] == 200_000_000:
         # if 200M+ is selected, don't filter on a upper limit
         data = data[(data["population"] >= pop_size[0])]
-    else:    
-        data = data[(data["population"] >= pop_size[0]) & (data["population"] <= pop_size[1])]
-    
+    else:
+        data = data[
+            (data["population"] >= pop_size[0]) & (data["population"] <= pop_size[1])
+        ]
+
     return data
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server()
