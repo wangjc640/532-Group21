@@ -230,8 +230,8 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
     
 
     
-    
-    main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
+    if((region is None) & (sub_region is None) &(income_grp is None)):
+        main_map = (alt.Chart(world_map, title=f"{labels[stat]} by Country for {year[1]}")
                     .mark_geoshape(stroke="black")
                     .transform_lookup(lookup="id", from_=alt.LookupData(data, key="id", fields=["name", stat]))
                     .encode(tooltip=["name:O", stat + ":Q"], color=alt.Color(stat + ":Q", title=f"{labels[stat]}"))
@@ -239,9 +239,9 @@ def plot_map(stat, region, sub_region, income_grp, pop_size, year):
                     .configure_legend(labelFontSize=12)
                     .project(type="equalEarth")
                     .properties(width=1000, height=500)
-                )
+                    )
     
-    if(region is not None and sub_region is None):
+    if(region is not None): #and sub_region is None
         s = None
         t = None
         if(region == "Europe"):
@@ -298,9 +298,11 @@ def data_filter(stat, region, sub_region, income_grp): #year, pop
             target = gapminder[gapminder["income_group"] == income_grp]
             compensate = gapminder[gapminder["income_group"] != income_grp]
 
+    target = target.dropna()
+    compensate = compensate.dropna()
     compensate[stat] = -1
     data = pd.concat([target,compensate])
-    print(data)
+    print(compensate)
     return data
 
 
